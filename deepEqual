@@ -1,0 +1,45 @@
+const deepEqual = (a, b) => {
+  if (a === b) return true;
+  
+  if (a.constructor.name !== b.constructor.name) return false;
+  
+  // NaN is annoying, chick it on it's own
+  if (a.constructor.name === "Number" && isNaN(a) && isNaN(b)) return true;
+  
+  // primatives
+  if (a.constructor.name === 'Boolean' || a.constructor.name === 'String' || a.constructor.name === 'Number') {
+    return a === b;
+  }
+
+  // date objects
+  if (a.constructor.name === 'Date') {
+    return a.toString === b.toString();
+  }
+  // regex objects
+  if (a.constructor.name === 'RegExp') {
+    return String(a) === String(b);
+  }
+  // @TODO maths objects - would figure this one out if this was going to production
+  if (a.constructor.name === 'Object') {
+   
+    let keysA = Object.keys(a);
+    if (keysA.length !== Object.keys(b).length) return false;
+    for(let i = 0; i<keysA.length; i++) {
+      let keyName = keysA[i];
+      // avoid checking non-enumerated properties
+      // if there is an expectation that prototype properties are overwritten, we should check non-enumerated properties also
+      if (!a.hasOwnProperty(keyName)) continue;    
+      if (!deepEqual(a[keyName], b[keyName])) return false;
+    }
+    
+    return true;
+  }
+  if (a.constructor.name === 'Array') {
+    if (a.length !== b.length) return false;
+    for (let i = 0; i < a.length; i++) {
+      if(!deepEqual(a[i], b[i])) return false;
+    }
+    return true;
+  }
+  console.warn("If you got here this function is incomplete, missing an edge case or otherwise");
+}
